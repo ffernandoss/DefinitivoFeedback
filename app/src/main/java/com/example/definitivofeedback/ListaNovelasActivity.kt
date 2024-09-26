@@ -28,15 +28,18 @@ class ListaNovelasActivity : ComponentActivity() {
         }
     }
 }
-
 @Composable
 fun ListaNovelasScreen(modifier: Modifier = Modifier) {
     var showDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var showErrorDialog by remember { mutableStateOf(false) }
     var nombre by remember { mutableStateOf("") }
     var año by remember { mutableStateOf("") }
     var descripcion by remember { mutableStateOf("") }
     var valoracion by remember { mutableStateOf("") }
     var novelas by remember { mutableStateOf(listOf<Novela>()) }
+    var nombreABorrar by remember { mutableStateOf("") }
+    var mensajeError by remember { mutableStateOf("") }
 
     val context = LocalContext.current
 
@@ -51,7 +54,7 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier) {
             Text(text = "Añadir novela")
         }
         Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = { /* TODO: Eliminar novela */ }) {
+        Button(onClick = { showDeleteDialog = true }) {
             Text(text = "Eliminar novela")
         }
 
@@ -110,9 +113,58 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier) {
                 }
             )
         }
+
+        if (showDeleteDialog) {
+            AlertDialog(
+                onDismissRequest = { showDeleteDialog = false },
+                title = { Text(text = "Eliminar novela") },
+                text = {
+                    Column {
+                        TextField(
+                            value = nombreABorrar,
+                            onValueChange = { nombreABorrar = it },
+                            label = { Text("Nombre de la novela a borrar") }
+                        )
+                    }
+                },
+                confirmButton = {
+                    Button(onClick = {
+                        val novelaAEliminar = novelas.find { it.nombre == nombreABorrar }
+                        if (novelaAEliminar != null) {
+                            novelas = novelas - novelaAEliminar
+                            mensajeError = ""
+                        } else {
+                            mensajeError = "No se ha encontrado ninguna novela con ese nombre"
+                            showErrorDialog = true
+                        }
+                        nombreABorrar = ""
+                        showDeleteDialog = false
+                    }) {
+                        Text("Eliminar")
+                    }
+                },
+                dismissButton = {
+                    Button(onClick = { showDeleteDialog = false }) {
+                        Text("Cancelar")
+                    }
+                }
+            )
+        }
+
+        if (showErrorDialog) {
+            AlertDialog(
+                onDismissRequest = { showErrorDialog = false },
+                title = { Text(text = "Error") },
+                text = { Text(text = mensajeError) },
+                confirmButton = {
+                    Button(onClick = { showErrorDialog = false }) {
+                        Text("OK")
+                    }
+                }
+            )
+        }
     }
 }
-
 @Preview(showBackground = true)
 @Composable
 fun ListaNovelasScreenPreview() {
