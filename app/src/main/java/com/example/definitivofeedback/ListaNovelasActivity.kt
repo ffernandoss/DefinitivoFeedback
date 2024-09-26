@@ -4,14 +4,17 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.definitivofeedback.ui.theme.DefinitivoFeedbackTheme
+
+data class Novela(val nombre: String, val año: String, val descripcion: String, val isFavorite: Boolean)
 
 class ListaNovelasActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,6 +36,7 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier) {
     var año by remember { mutableStateOf("") }
     var descripcion by remember { mutableStateOf("") }
     var isFavorite by remember { mutableStateOf(false) }
+    var novelas by remember { mutableStateOf(listOf<Novela>()) }
 
     Column(
         modifier = modifier
@@ -47,6 +51,16 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = { /* TODO: Eliminar novela */ }) {
             Text(text = "Eliminar novela")
+        }
+
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
+            items(novelas) { novela ->
+                Text(text = "${novela.nombre} (${novela.año}) - ${novela.descripcion}")
+                if (novela.isFavorite) {
+                    Text(text = "Favorito", color = MaterialTheme.colorScheme.primary)
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+            }
         }
 
         if (showDialog) {
@@ -81,7 +95,11 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier) {
                 },
                 confirmButton = {
                     Button(onClick = {
-                        // TODO: Añadir novela a la lista
+                        novelas = novelas + Novela(nombre, año, descripcion, isFavorite)
+                        nombre = ""
+                        año = ""
+                        descripcion = ""
+                        isFavorite = false
                         showDialog = false
                     }) {
                         Text("Añadir")
