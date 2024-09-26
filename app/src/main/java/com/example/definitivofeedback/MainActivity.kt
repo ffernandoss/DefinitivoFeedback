@@ -47,10 +47,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
         }) {
             Text(text = "Ver lista completa de novelas")
         }
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = { /* TODO: Navegar a la lista de novelas favoritas */ }) {
-            Text(text = "Ver novelas favoritas")
-        }
+
     }
 }
 
