@@ -15,6 +15,12 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.definitivofeedback.ui.theme.DefinitivoFeedbackTheme
+import android.content.Intent
+import android.content.Context
+import android.content.SharedPreferences
+import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.reflect.TypeToken
+import com.google.gson.Gson
+
 
 class ListaNovelasActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,6 +49,17 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier) {
     var mostrarFavoritas by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("novelas_prefs", Context.MODE_PRIVATE)
+    val gson = Gson()
+
+    // Load novels from SharedPreferences
+    LaunchedEffect(Unit) {
+        val novelasJson = sharedPreferences.getString("novelas", null)
+        if (novelasJson != null) {
+            val type = object : TypeToken<List<Novela>>() {}.type
+            novelas = gson.fromJson(novelasJson, type)
+        }
+    }
 
     Column(
         modifier = modifier
@@ -61,6 +78,19 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = { mostrarFavoritas = !mostrarFavoritas }) {
             Text(text = if (mostrarFavoritas) "Mostrar todas las novelas" else "Mostrar novelas favoritas")
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(onClick = {
+            // Save novels to SharedPreferences
+            val editor = sharedPreferences.edit()
+            val novelasJson = gson.toJson(novelas)
+            editor.putString("novelas", novelasJson)
+            editor.apply()
+
+            val intent = Intent(context, MainActivity::class.java)
+            context.startActivity(intent)
+        }) {
+            Text(text = "Volver a Main")
         }
 
         val novelasAMostrar = if (mostrarFavoritas) novelas.filter { it.isFavorite } else novelas
