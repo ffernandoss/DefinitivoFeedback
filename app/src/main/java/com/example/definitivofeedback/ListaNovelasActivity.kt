@@ -4,17 +4,17 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.definitivofeedback.ui.theme.DefinitivoFeedbackTheme
-
-data class Novela(val nombre: String, val año: String, val descripcion: String, val valoracion: String, var isFavorite: Boolean)
 
 class ListaNovelasActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,6 +38,8 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier) {
     var valoracion by remember { mutableStateOf("") }
     var novelas by remember { mutableStateOf(listOf<Novela>()) }
 
+    val context = LocalContext.current
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -53,27 +55,13 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier) {
             Text(text = "Eliminar novela")
         }
 
-        LazyColumn(modifier = Modifier.fillMaxSize()) {
-            items(novelas) { novela ->
-                var isFavorite by remember { mutableStateOf(novela.isFavorite) }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(text = "${novela.nombre} (${novela.año}) - ${novela.descripcion}")
-                        Text(text = "Valoración: ${novela.valoracion}")
-                    }
-                    Checkbox(
-                        checked = isFavorite,
-                        onCheckedChange = { isChecked ->
-                            isFavorite = isChecked
-                            novela.isFavorite = isChecked
-                            // Trigger recomposition
-                            novelas = novelas.map { if (it == novela) it.copy(isFavorite = isChecked) else it }
-                        }
-                    )
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-            }
+        val recyclerView = remember { RecyclerView(context) }
+        recyclerView.layoutManager = LinearLayoutManager(context)
+        recyclerView.adapter = NovelaAdapter(novelas) { novela ->
+            novelas = novelas.map { if (it == novela) it.copy(isFavorite = novela.isFavorite) else it }
         }
+
+        AndroidView({ recyclerView }, modifier = Modifier.fillMaxSize())
 
         if (showDialog) {
             AlertDialog(
