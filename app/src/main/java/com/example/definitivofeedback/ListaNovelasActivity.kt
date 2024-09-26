@@ -133,12 +133,28 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier) {
                 },
                 confirmButton = {
                     Button(onClick = {
-                        novelas = novelas + Novela(nombre, año, descripcion, valoracion, false)
-                        nombre = ""
-                        año = ""
-                        descripcion = ""
-                        valoracion = ""
-                        showDialog = false
+                        when {
+                            nombre.isBlank() || año.isBlank() || descripcion.isBlank() || valoracion.isBlank() -> {
+                                mensajeError = "Todos los campos deben estar completos"
+                                showErrorDialog = true
+                            }
+                            !año.all { it.isDigit() } -> {
+                                mensajeError = "El año no debe contener letras"
+                                showErrorDialog = true
+                            }
+                            !valoracion.all { it.isDigit() } -> {
+                                mensajeError = "La valoración no debe contener letras"
+                                showErrorDialog = true
+                            }
+                            else -> {
+                                novelas = novelas + Novela(nombre, año, descripcion, valoracion, false)
+                                nombre = ""
+                                año = ""
+                                descripcion = ""
+                                valoracion = ""
+                                showDialog = false
+                            }
+                        }
                     }) {
                         Text("Añadir")
                     }
