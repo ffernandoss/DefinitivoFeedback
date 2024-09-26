@@ -40,6 +40,7 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier) {
     var novelas by remember { mutableStateOf(listOf<Novela>()) }
     var nombreABorrar by remember { mutableStateOf("") }
     var mensajeError by remember { mutableStateOf("") }
+    var mostrarFavoritas by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
 
@@ -57,10 +58,16 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier) {
         Button(onClick = { showDeleteDialog = true }) {
             Text(text = "Eliminar novela")
         }
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(onClick = { mostrarFavoritas = !mostrarFavoritas }) {
+            Text(text = if (mostrarFavoritas) "Mostrar todas las novelas" else "Mostrar novelas favoritas")
+        }
+
+        val novelasAMostrar = if (mostrarFavoritas) novelas.filter { it.isFavorite } else novelas
 
         val recyclerView = remember { RecyclerView(context) }
         recyclerView.layoutManager = LinearLayoutManager(context)
-        recyclerView.adapter = NovelaAdapter(novelas) { novela ->
+        recyclerView.adapter = NovelaAdapter(novelasAMostrar) { novela ->
             novelas = novelas.map { if (it == novela) it.copy(isFavorite = novela.isFavorite) else it }
         }
 
