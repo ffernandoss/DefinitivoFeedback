@@ -1,5 +1,6 @@
 package com.example.definitivofeedback
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -11,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.definitivofeedback.ui.theme.DefinitivoFeedbackTheme
@@ -31,6 +33,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainScreen(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -39,7 +42,9 @@ fun MainScreen(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(text = "GESTION DE NOVELAS", modifier = Modifier.padding(bottom = 32.dp))
-        Button(onClick = { /* TODO: Navegar a la lista completa de novelas */ }) {
+        Button(onClick = {
+            context.startActivity(Intent(context, ListaNovelasActivity::class.java))
+        }) {
             Text(text = "Ver lista completa de novelas")
         }
         Spacer(modifier = Modifier.height(16.dp))
