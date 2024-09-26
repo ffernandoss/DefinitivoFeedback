@@ -14,7 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.definitivofeedback.ui.theme.DefinitivoFeedbackTheme
 
-data class Novela(val nombre: String, val año: String, val descripcion: String, val isFavorite: Boolean)
+data class Novela(val nombre: String, val año: String, val descripcion: String, val valoracion: String, var isFavorite: Boolean)
 
 class ListaNovelasActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,7 +35,7 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier) {
     var nombre by remember { mutableStateOf("") }
     var año by remember { mutableStateOf("") }
     var descripcion by remember { mutableStateOf("") }
-    var isFavorite by remember { mutableStateOf(false) }
+    var valoracion by remember { mutableStateOf("") }
     var novelas by remember { mutableStateOf(listOf<Novela>()) }
 
     Column(
@@ -55,9 +55,21 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier) {
 
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             items(novelas) { novela ->
-                Text(text = "${novela.nombre} (${novela.año}) - ${novela.descripcion}")
-                if (novela.isFavorite) {
-                    Text(text = "Favorito", color = MaterialTheme.colorScheme.primary)
+                var isFavorite by remember { mutableStateOf(novela.isFavorite) }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(text = "${novela.nombre} (${novela.año}) - ${novela.descripcion}")
+                        Text(text = "Valoración: ${novela.valoracion}")
+                    }
+                    Checkbox(
+                        checked = isFavorite,
+                        onCheckedChange = { isChecked ->
+                            isFavorite = isChecked
+                            novela.isFavorite = isChecked
+                            // Trigger recomposition
+                            novelas = novelas.map { if (it == novela) it.copy(isFavorite = isChecked) else it }
+                        }
+                    )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
             }
@@ -84,22 +96,20 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier) {
                             onValueChange = { descripcion = it },
                             label = { Text("Descripción") }
                         )
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Checkbox(
-                                checked = isFavorite,
-                                onCheckedChange = { isFavorite = it }
-                            )
-                            Text(text = "Añadir a favoritos")
-                        }
+                        TextField(
+                            value = valoracion,
+                            onValueChange = { valoracion = it },
+                            label = { Text("Valoración") }
+                        )
                     }
                 },
                 confirmButton = {
                     Button(onClick = {
-                        novelas = novelas + Novela(nombre, año, descripcion, isFavorite)
+                        novelas = novelas + Novela(nombre, año, descripcion, valoracion, false)
                         nombre = ""
                         año = ""
                         descripcion = ""
-                        isFavorite = false
+                        valoracion = ""
                         showDialog = false
                     }) {
                         Text("Añadir")
