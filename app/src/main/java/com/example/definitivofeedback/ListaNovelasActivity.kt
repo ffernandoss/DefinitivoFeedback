@@ -17,9 +17,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.definitivofeedback.ui.theme.DefinitivoFeedbackTheme
 import android.content.Intent
 import android.content.Context
-import android.content.SharedPreferences
-import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.reflect.TypeToken
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 
 class ListaNovelasActivity : ComponentActivity() {
