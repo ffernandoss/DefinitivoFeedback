@@ -51,7 +51,7 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier) {
     val sharedPreferences = context.getSharedPreferences("novelas_prefs", Context.MODE_PRIVATE)
     val gson = Gson()
 
-    // Load novels from SharedPreferences
+
     LaunchedEffect(Unit) {
         val novelasJson = sharedPreferences.getString("novelas", null)
         if (novelasJson != null) {
