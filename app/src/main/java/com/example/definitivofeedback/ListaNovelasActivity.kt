@@ -185,6 +185,11 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier) {
                         val novelaAEliminar = novelas.find { it.nombre == nombreABorrar }
                         if (novelaAEliminar != null) {
                             novelas = novelas - novelaAEliminar
+                            // Save updated novels to SharedPreferences
+                            val editor = sharedPreferences.edit()
+                            val novelasJson = gson.toJson(novelas)
+                            editor.putString("novelas", novelasJson)
+                            editor.apply()
                             mensajeError = ""
                         } else {
                             mensajeError = "No se ha encontrado ninguna novela con ese nombre"
