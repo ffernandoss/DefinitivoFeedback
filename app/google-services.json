@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "748759521734",
+    "project_id": "novelasconfirebase",
+    "storage_bucket": "novelasconfirebase.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:748759521734:android:08e12bb6205eca4754bac7",
+        "android_client_info": {
+          "package_name": "com.example.definitivofeedback"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDq585OermSgsgNNEW8CcM5n5CblSfqWLE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
