@@ -178,9 +178,15 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier) {
                     Button(onClick = {
                         val novelaAEliminar = novelas.find { it.nombre == nombreABorrar }
                         if (novelaAEliminar != null) {
-                            // Aquí deberías implementar la lógica para eliminar la novela de Firestore
-                            novelas = novelas - novelaAEliminar
-                            mensajeError = ""
+                            novelaStorage.deleteNovela(novelaAEliminar.nombre) { success ->
+                                if (success) {
+                                    novelas = novelas - novelaAEliminar
+                                    mensajeError = ""
+                                } else {
+                                    mensajeError = "Error al eliminar la novela de Firestore"
+                                    showErrorDialog = true
+                                }
+                            }
                         } else {
                             mensajeError = "No se ha encontrado ninguna novela con ese nombre"
                             showErrorDialog = true
@@ -211,13 +217,5 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier) {
                 }
             )
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ListaNovelasScreenPreview() {
-    DefinitivoFeedbackTheme {
-        ListaNovelasScreen()
     }
 }

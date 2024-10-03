@@ -5,7 +5,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
-
 data class Novela(
     val nombre: String = "",
     val año: Int = 0,
@@ -40,6 +39,29 @@ class NovelaStorage {
             .addOnFailureListener { exception ->
                 Log.w("NovelaStorage", "Error getting documents.", exception)
                 callback(emptyList())
+            }
+    }
+
+    fun deleteNovela(nombre: String, callback: (Boolean) -> Unit) {
+        db.collection("novelas")
+            .whereEqualTo("nombre", nombre)
+            .get()
+            .addOnSuccessListener { result ->
+                for (document in result) {
+                    db.collection("novelas").document(document.id).delete()
+                        .addOnSuccessListener {
+                            Log.d("NovelaStorage", "DocumentSnapshot successfully deleted!")
+                            callback(true)
+                        }
+                        .addOnFailureListener { e ->
+                            Log.w("NovelaStorage", "Error deleting document", e)
+                            callback(false)
+                        }
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.w("NovelaStorage", "Error finding document", e)
+                callback(false)
             }
     }
 }
