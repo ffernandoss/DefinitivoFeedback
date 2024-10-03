@@ -7,8 +7,6 @@ import android.widget.CheckBox
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-data class Novela(val nombre: String, val año: String, val descripcion: String, val valoracion: String, var isFavorite: Boolean)
-
 class NovelaAdapter(private val novelas: List<Novela>, private val onFavoriteChanged: (Novela) -> Unit) :
     RecyclerView.Adapter<NovelaAdapter.NovelaViewHolder>() {
 
@@ -31,8 +29,8 @@ class NovelaAdapter(private val novelas: List<Novela>, private val onFavoriteCha
         holder.valoracionTextView.text = "Valoración: ${novela.valoracion}"
         holder.favoriteCheckBox.isChecked = novela.isFavorite
         holder.favoriteCheckBox.setOnCheckedChangeListener { _, isChecked ->
-            novela.isFavorite = isChecked
-            onFavoriteChanged(novela)
+            val updatedNovela = novela.copy(isFavorite = isChecked)
+            onFavoriteChanged(updatedNovela)
         }
     }
 

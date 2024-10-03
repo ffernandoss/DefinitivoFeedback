@@ -16,10 +16,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.definitivofeedback.ui.theme.DefinitivoFeedbackTheme
 import android.content.Intent
-import android.content.Context
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-
 
 class ListaNovelasActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,6 +29,7 @@ class ListaNovelasActivity : ComponentActivity() {
         }
     }
 }
+
 @Composable
 fun ListaNovelasScreen(modifier: Modifier = Modifier) {
     var showDialog by remember { mutableStateOf(false) }
@@ -48,15 +45,11 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier) {
     var mostrarFavoritas by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
-    val sharedPreferences = context.getSharedPreferences("novelas_prefs", Context.MODE_PRIVATE)
-    val gson = Gson()
-
+    val novelaStorage = NovelaStorage()
 
     LaunchedEffect(Unit) {
-        val novelasJson = sharedPreferences.getString("novelas", null)
-        if (novelasJson != null) {
-            val type = object : TypeToken<List<Novela>>() {}.type
-            novelas = gson.fromJson(novelasJson, type)
+        novelaStorage.getNovelas { fetchedNovelas ->
+            novelas = fetchedNovelas
         }
     }
 
@@ -80,12 +73,6 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier) {
         }
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = {
-            // Save novels to SharedPreferences
-            val editor = sharedPreferences.edit()
-            val novelasJson = gson.toJson(novelas)
-            editor.putString("novelas", novelasJson)
-            editor.apply()
-
             val intent = Intent(context, MainActivity::class.java)
             context.startActivity(intent)
         }) {
@@ -146,7 +133,15 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier) {
                                 showErrorDialog = true
                             }
                             else -> {
-                                novelas = novelas + Novela(nombre, año, descripcion, valoracion, false)
+                                val nuevaNovela = Novela(
+                                    nombre = nombre,
+                                    año = año.toInt(),
+                                    descripcion = descripcion,
+                                    valoracion = valoracion.toDouble(),
+                                    isFavorite = false
+                                )
+                                novelaStorage.saveNovela(nuevaNovela)
+                                novelas = novelas + nuevaNovela
                                 nombre = ""
                                 año = ""
                                 descripcion = ""
@@ -183,12 +178,8 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier) {
                     Button(onClick = {
                         val novelaAEliminar = novelas.find { it.nombre == nombreABorrar }
                         if (novelaAEliminar != null) {
+                            // Aquí deberías implementar la lógica para eliminar la novela de Firestore
                             novelas = novelas - novelaAEliminar
-                            // Save updated novels to SharedPreferences
-                            val editor = sharedPreferences.edit()
-                            val novelasJson = gson.toJson(novelas)
-                            editor.putString("novelas", novelasJson)
-                            editor.apply()
                             mensajeError = ""
                         } else {
                             mensajeError = "No se ha encontrado ninguna novela con ese nombre"
@@ -222,6 +213,7 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier) {
         }
     }
 }
+
 @Preview(showBackground = true)
 @Composable
 fun ListaNovelasScreenPreview() {
