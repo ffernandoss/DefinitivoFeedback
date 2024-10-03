@@ -1,6 +1,7 @@
 package com.example.definitivofeedback
 
 import android.util.Log
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -15,6 +16,7 @@ data class Novela(
 
 class NovelaStorage {
     private val db: FirebaseFirestore = Firebase.firestore
+
 
     fun saveNovela(novela: Novela) {
         db.collection("novelas")
@@ -55,6 +57,30 @@ class NovelaStorage {
                         }
                         .addOnFailureListener { e ->
                             Log.w("NovelaStorage", "Error deleting document", e)
+                            callback(false)
+                        }
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.w("NovelaStorage", "Error finding document", e)
+                callback(false)
+            }
+    }
+
+    fun updateFavoriteStatus(novela: Novela, callback: (Boolean) -> Unit) {
+        db.collection("novelas")
+            .whereEqualTo("nombre", novela.nombre)
+            .get()
+            .addOnSuccessListener { result ->
+                for (document in result) {
+                    db.collection("novelas").document(document.id)
+                        .update("favorite", novela.isFavorite)  // Cambia "isFavorite" a "favorite"
+                        .addOnSuccessListener {
+                            Log.d("NovelaStorage", "DocumentSnapshot successfully updated!")
+                            callback(true)
+                        }
+                        .addOnFailureListener { e ->
+                            Log.w("NovelaStorage", "Error updating document", e)
                             callback(false)
                         }
                 }

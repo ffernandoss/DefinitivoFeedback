@@ -29,7 +29,6 @@ class ListaNovelasActivity : ComponentActivity() {
         }
     }
 }
-
 @Composable
 fun ListaNovelasScreen(modifier: Modifier = Modifier) {
     var showDialog by remember { mutableStateOf(false) }
@@ -84,7 +83,14 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier) {
         val recyclerView = remember { RecyclerView(context) }
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.adapter = NovelaAdapter(novelasAMostrar) { novela ->
-            novelas = novelas.map { if (it == novela) it.copy(isFavorite = novela.isFavorite) else it }
+            novelaStorage.updateFavoriteStatus(novela) { success ->
+                if (success) {
+                    novelas = novelas.map { if (it.nombre == novela.nombre) novela else it }
+                } else {
+                    mensajeError = "Error al actualizar el estado de favorito en Firestore"
+                    showErrorDialog = true
+                }
+            }
         }
 
         AndroidView({ recyclerView }, modifier = Modifier.fillMaxSize())
