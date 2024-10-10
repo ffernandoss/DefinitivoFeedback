@@ -15,3 +15,8 @@ En esta clase se hace uso de `SharedPreferences` y `Gson` para añadir y elimina
 ## Clase `NovelaAdapter`
 
 Tiene los atributos de `nombre`, `año`, `descripcion`, `valoracion` y un booleano para añadir a favoritos. Está formada por la clase interna `NovelaViewHolder`, la cual referencia cada elemento con la novela. La función `onCreateViewHolder` devuelve un objeto de `CreateViewHolder`. La función `onBindViewHolder` asigna los datos de las novelas a la vista. La función `getItemCount` devuelve el número de novelas creadas.
+
+------ ENTREGA 2------
+## Clase `NovelaStorage`
+
+es la encargada de realizar las operaciones de añadir, eliminar, mostrar como favoritas... todos estos cambios se muestran en la base de datos de firebase en tiempo real, si se modifica lo de ser favortia se cambia el atributo booleano
