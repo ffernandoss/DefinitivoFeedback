@@ -20,3 +20,35 @@ Tiene los atributos de `nombre`, `año`, `descripcion`, `valoracion` y un boolea
 ## Clase `NovelaStorage`
 
 es la encargada de realizar las operaciones de añadir, eliminar, mostrar como favoritas... todos estos cambios se muestran en la base de datos de firebase en tiempo real, si se modifica lo de ser favortia se cambia el atributo booleano
+
+
+
+## Entrega 3
+
+### Modo Oscuro
+
+Se ha añadido la funcionalidad de modo oscuro en la aplicación. Los usuarios pueden activar o desactivar el modo oscuro desde la pantalla de ajustes. Esta preferencia se guarda en `SharedPreferences` y se aplica en toda la aplicación.
+
+### Novelas por Usuario
+
+Cada usuario tiene sus propias novelas. Se ha modificado la base de datos para que las novelas estén asociadas a un usuario específico. Esto se ha logrado añadiendo un campo `userId` en la tabla de novelas.
+
+### Cambios en `UserDatabaseHelper`
+
+Se han añadido métodos para gestionar las novelas por usuario, incluyendo `addNovelaForUser`, `getNovelasByUser` y `deleteNovelaForUser`.
+
+### Cambios en `ListaNovelasActivity`
+
+Se ha modificado la actividad para que muestre solo las novelas del usuario actualmente logueado. Se utiliza el `userId` del usuario actual para filtrar las novelas.
+
+### Cambios en `AjustesActivity`
+
+Se ha añadido la funcionalidad para actualizar el modo oscuro en la base de datos del usuario. Cuando el usuario cambia el modo oscuro, se actualiza tanto en `SharedPreferences` como en la base de datos.
+
+### Cambios en `LoginActivity`
+
+Se ha añadido la funcionalidad para guardar el `userId` del usuario logueado en `SharedPreferences`. Esto permite que otras actividades puedan acceder al `userId` del usuario actual.
+
+### Cambios en `NovelaAdapter`
+
+Se ha añadido la funcionalidad para actualizar el estado de favorito de una novela en Firebase. Cuando el usuario marca o desmarca una novela como favorita, se actualiza en tiempo real en Firebase.
