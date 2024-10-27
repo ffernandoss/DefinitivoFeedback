@@ -54,6 +54,25 @@ class UserDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
         db.update(TABLE_USERS, values, "$COLUMN_USERNAME = ?", arrayOf(username))
     }
 
+    fun deleteUser(username: String, password: String): Boolean {
+        val db = writableDatabase
+        val cursor = db.query(
+            TABLE_USERS,
+            arrayOf(COLUMN_ID),
+            "$COLUMN_USERNAME = ? AND $COLUMN_PASSWORD = ?",
+            arrayOf(username, password),
+            null, null, null
+        )
+        return if (cursor.moveToFirst()) {
+            val userId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID))
+            cursor.close()
+            db.delete(TABLE_USERS, "$COLUMN_ID = ?", arrayOf(userId.toString())) > 0
+        } else {
+            cursor.close()
+            false
+        }
+    }
+
     companion object {
         private const val DATABASE_NAME = "users.db"
         private const val DATABASE_VERSION = 2

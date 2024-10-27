@@ -112,14 +112,28 @@ class LoginActivity : ComponentActivity() {
         }
     }
 
-    private fun registerUser(context: Context, username: String, password: String): Boolean {
-        val db = dbHelper.writableDatabase
-        val values = ContentValues().apply {
-            put(UserDatabaseHelper.COLUMN_USERNAME, username)
-            put(UserDatabaseHelper.COLUMN_PASSWORD, password)
-            put(UserDatabaseHelper.COLUMN_DARK_MODE, false) // Default to light mode
+
+        private fun registerUser(context: Context, username: String, password: String): Boolean {
+            val db = dbHelper.writableDatabase
+            val cursor = db.query(
+                UserDatabaseHelper.TABLE_USERS,
+                arrayOf(UserDatabaseHelper.COLUMN_ID),
+                "${UserDatabaseHelper.COLUMN_USERNAME} = ?",
+                arrayOf(username),
+                null, null, null
+            )
+            return if (cursor.moveToFirst()) {
+                cursor.close()
+                false // Username already exists
+            } else {
+                cursor.close()
+                val values = ContentValues().apply {
+                    put(UserDatabaseHelper.COLUMN_USERNAME, username)
+                    put(UserDatabaseHelper.COLUMN_PASSWORD, password)
+                    put(UserDatabaseHelper.COLUMN_DARK_MODE, false) // Default to light mode
+                }
+                val newRowId = db.insert(UserDatabaseHelper.TABLE_USERS, null, values)
+                newRowId != -1L
+            }
         }
-        val newRowId = db.insert(UserDatabaseHelper.TABLE_USERS, null, values)
-        return newRowId != -1L
     }
-}
