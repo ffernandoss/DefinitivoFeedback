@@ -9,7 +9,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -22,7 +22,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         sharedPreferences = getSharedPreferences("settings", Context.MODE_PRIVATE)
         val isDarkMode = sharedPreferences.getBoolean("dark_mode", false)
 
@@ -39,6 +38,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen(modifier: Modifier = Modifier) {
     val context = LocalContext.current
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -46,11 +46,12 @@ fun MainScreen(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(text = "GESTION DE NOVELAS", modifier = Modifier.padding(bottom = 32.dp))
+        Text(text = "GESTIÓN DE NOVELAS")
+        Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = {
             context.startActivity(Intent(context, ListaNovelasActivity::class.java))
         }) {
-            Text(text = "Ver lista completa de novelas")
+            Text(text = "Ir a Lista de Novelas")
         }
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = {
@@ -62,7 +63,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
         Button(onClick = {
             context.startActivity(Intent(context, UserListActivity::class.java))
         }) {
-            Text(text = "Ver lista de usuarios")
+            Text(text = "Lista de Usuarios")
         }
     }
 }

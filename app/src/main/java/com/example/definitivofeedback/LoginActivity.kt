@@ -3,6 +3,7 @@ package com.example.definitivofeedback
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.database.Cursor
 import android.os.Bundle
 import android.widget.Toast
@@ -20,13 +21,15 @@ import com.example.definitivofeedback.ui.theme.DefinitivoFeedbackTheme
 
 class LoginActivity : ComponentActivity() {
     private lateinit var dbHelper: UserDatabaseHelper
+    private lateinit var sharedPreferences: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         dbHelper = UserDatabaseHelper(this)
+        sharedPreferences = getSharedPreferences("settings", Context.MODE_PRIVATE)
 
         setContent {
-            DefinitivoFeedbackTheme {
+            DefinitivoFeedbackTheme(darkTheme = false) { // Always light mode for login
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     LoginScreen(modifier = Modifier.padding(innerPadding))
                 }
@@ -36,10 +39,9 @@ class LoginActivity : ComponentActivity() {
 
     @Composable
     fun LoginScreen(modifier: Modifier = Modifier) {
-        val context = LocalContext.current
         var username by remember { mutableStateOf("") }
         var password by remember { mutableStateOf("") }
-        var isLoginMode by remember { mutableStateOf(true) }
+        val context = LocalContext.current
 
         Column(
             modifier = modifier
@@ -48,58 +50,66 @@ class LoginActivity : ComponentActivity() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text(text = if (isLoginMode) "Iniciar Sesión" else "Registrarse")
-            Spacer(modifier = Modifier.height(16.dp))
             TextField(
                 value = username,
                 onValueChange = { username = it },
-                label = { Text("Usuario") }
+                label = { Text("Username") }
             )
             Spacer(modifier = Modifier.height(16.dp))
             TextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text("Contraseña") },
+                label = { Text("Password") },
                 visualTransformation = PasswordVisualTransformation()
             )
             Spacer(modifier = Modifier.height(16.dp))
             Button(onClick = {
-                if (isLoginMode) {
-                    if (loginUser(context, username, password)) {
-                        context.startActivity(Intent(context, MainActivity::class.java))
-                    } else {
-                        Toast.makeText(context, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show()
+                val user = loginUser(context, username, password)
+                if (user != null) {
+                    with(sharedPreferences.edit()) {
+                        putBoolean("dark_mode", user.darkMode)
+                        putString("current_user", user.username)
+                        apply()
                     }
+                    context.startActivity(Intent(context, MainActivity::class.java))
                 } else {
-                    if (registerUser(context, username, password)) {
-                        Toast.makeText(context, "Registro exitoso", Toast.LENGTH_SHORT).show()
-                        isLoginMode = true
-                    } else {
-                        Toast.makeText(context, "Error al registrar usuario", Toast.LENGTH_SHORT).show()
-                    }
+                    Toast.makeText(context, "Invalid credentials", Toast.LENGTH_SHORT).show()
                 }
             }) {
-                Text(text = if (isLoginMode) "Iniciar Sesión" else "Registrarse")
+                Text("Iniciar Sesión")
             }
             Spacer(modifier = Modifier.height(16.dp))
-            TextButton(onClick = { isLoginMode = !isLoginMode }) {
-                Text(text = if (isLoginMode) "¿No tienes cuenta? Regístrate" else "¿Ya tienes cuenta? Inicia sesión")
+            Button(onClick = {
+                val success = registerUser(context, username, password)
+                if (success) {
+                    Toast.makeText(context, "User registered successfully", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(context, "Registration failed", Toast.LENGTH_SHORT).show()
+                }
+            }) {
+                Text("Registrarse")
             }
         }
     }
 
-    private fun loginUser(context: Context, username: String, password: String): Boolean {
+    private fun loginUser(context: Context, username: String, password: String): User? {
         val db = dbHelper.readableDatabase
         val cursor: Cursor = db.query(
             UserDatabaseHelper.TABLE_USERS,
-            arrayOf(UserDatabaseHelper.COLUMN_ID),
+            arrayOf(UserDatabaseHelper.COLUMN_ID, UserDatabaseHelper.COLUMN_DARK_MODE),
             "${UserDatabaseHelper.COLUMN_USERNAME} = ? AND ${UserDatabaseHelper.COLUMN_PASSWORD} = ?",
             arrayOf(username, password),
             null, null, null
         )
-        val isLoggedIn = cursor.moveToFirst()
-        cursor.close()
-        return isLoggedIn
+        return if (cursor.moveToFirst()) {
+            val id = cursor.getInt(cursor.getColumnIndexOrThrow(UserDatabaseHelper.COLUMN_ID))
+            val darkMode = cursor.getInt(cursor.getColumnIndexOrThrow(UserDatabaseHelper.COLUMN_DARK_MODE)) == 1
+            cursor.close()
+            User(id, username, password, darkMode)
+        } else {
+            cursor.close()
+            null
+        }
     }
 
     private fun registerUser(context: Context, username: String, password: String): Boolean {
@@ -107,6 +117,7 @@ class LoginActivity : ComponentActivity() {
         val values = ContentValues().apply {
             put(UserDatabaseHelper.COLUMN_USERNAME, username)
             put(UserDatabaseHelper.COLUMN_PASSWORD, password)
+            put(UserDatabaseHelper.COLUMN_DARK_MODE, false) // Default to light mode
         }
         val newRowId = db.insert(UserDatabaseHelper.TABLE_USERS, null, values)
         return newRowId != -1L

@@ -17,10 +17,12 @@ import com.example.definitivofeedback.ui.theme.DefinitivoFeedbackTheme
 
 class AjustesActivity : ComponentActivity() {
     private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var dbHelper: UserDatabaseHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         sharedPreferences = getSharedPreferences("settings", Context.MODE_PRIVATE)
+        dbHelper = UserDatabaseHelper(this)
         val isDarkMode = sharedPreferences.getBoolean("dark_mode", false)
 
         setContent {
@@ -36,6 +38,7 @@ class AjustesActivity : ComponentActivity() {
     fun AjustesScreen(modifier: Modifier = Modifier) {
         val context = LocalContext.current
         var isDarkMode by remember { mutableStateOf(sharedPreferences.getBoolean("dark_mode", false)) }
+        val currentUser = sharedPreferences.getString("current_user", "") ?: ""
 
         Column(
             modifier = modifier
@@ -56,7 +59,8 @@ class AjustesActivity : ComponentActivity() {
                             putBoolean("dark_mode", it)
                             apply()
                         }
-                        recreate()
+                        dbHelper.updateUserDarkMode(currentUser, it) // Actualiza la base de datos
+                        recreate() // Recreate activity to apply theme change
                     }
                 )
             }
