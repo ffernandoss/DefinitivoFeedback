@@ -11,8 +11,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DefinitivoFeedback"
         tools:targetApi="31">
+
         <activity
-            android:name=".MainActivity"
+            android:name=".LoginActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.DefinitivoFeedback">
@@ -21,8 +22,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.DefinitivoFeedback" />
+
         <activity android:name=".ListaNovelasActivity" />
-        <activity android:name=".AjustesActivity" /> <!-- Add this line -->
+        <activity android:name=".AjustesActivity" />
+        <activity android:name=".UserListActivity" />
     </application>
 
 </manifest>

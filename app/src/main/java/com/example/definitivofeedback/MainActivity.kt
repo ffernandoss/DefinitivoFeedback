@@ -58,6 +58,12 @@ fun MainScreen(modifier: Modifier = Modifier) {
         }) {
             Text(text = "Ajustes")
         }
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(onClick = {
+            context.startActivity(Intent(context, UserListActivity::class.java))
+        }) {
+            Text(text = "Ver lista de usuarios")
+        }
     }
 }
 
