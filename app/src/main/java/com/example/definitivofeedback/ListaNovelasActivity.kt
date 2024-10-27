@@ -19,18 +19,22 @@ import com.example.definitivofeedback.ui.theme.DefinitivoFeedbackTheme
 import android.content.Intent
 import android.content.SharedPreferences
 
+
 class ListaNovelasActivity : ComponentActivity() {
     private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var dbHelper: UserDatabaseHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         sharedPreferences = getSharedPreferences("settings", Context.MODE_PRIVATE)
+        dbHelper = UserDatabaseHelper(this)
         val isDarkMode = sharedPreferences.getBoolean("dark_mode", false)
+        val currentUser = sharedPreferences.getString("current_user", "") ?: ""
 
         setContent {
             DefinitivoFeedbackTheme(darkTheme = isDarkMode) {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    ListaNovelasScreen(modifier = Modifier.padding(innerPadding))
+                    ListaNovelasScreen(modifier = Modifier.padding(innerPadding), dbHelper = dbHelper, currentUser = currentUser)
                 }
             }
         }
@@ -38,7 +42,7 @@ class ListaNovelasActivity : ComponentActivity() {
 }
 
 @Composable
-fun ListaNovelasScreen(modifier: Modifier = Modifier) {
+fun ListaNovelasScreen(modifier: Modifier = Modifier, dbHelper: UserDatabaseHelper, currentUser: String) {
     var showDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showErrorDialog by remember { mutableStateOf(false) }
@@ -53,11 +57,10 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier) {
 
     val context = LocalContext.current
     val novelaStorage = NovelaStorage()
+    val userId = dbHelper.getUserIdByUsername(currentUser)
 
     LaunchedEffect(Unit) {
-        novelaStorage.getNovelas { fetchedNovelas ->
-            novelas = fetchedNovelas
-        }
+        novelas = dbHelper.getNovelasByUser(userId)
     }
 
     Column(
@@ -154,8 +157,9 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier) {
                                     valoracion = valoracion.toDouble(),
                                     isFavorite = false
                                 )
+                                dbHelper.addNovelaForUser(userId, nuevaNovela)
                                 novelaStorage.saveNovela(nuevaNovela)
-                                novelas = novelas + nuevaNovela
+                                novelas = dbHelper.getNovelasByUser(userId)
                                 nombre = ""
                                 año = ""
                                 descripcion = ""
@@ -194,7 +198,8 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier) {
                         if (novelaAEliminar != null) {
                             novelaStorage.deleteNovela(novelaAEliminar.nombre) { success ->
                                 if (success) {
-                                    novelas = novelas - novelaAEliminar
+                                    dbHelper.deleteNovelaForUser(userId, novelaAEliminar.nombre)
+                                    novelas = dbHelper.getNovelasByUser(userId)
                                     mensajeError = ""
                                 } else {
                                     mensajeError = "Error al eliminar la novela de Firestore"
