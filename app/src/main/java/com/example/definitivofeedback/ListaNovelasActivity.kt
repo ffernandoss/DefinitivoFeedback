@@ -1,5 +1,6 @@
 package com.example.definitivofeedback
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,12 +17,18 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.definitivofeedback.ui.theme.DefinitivoFeedbackTheme
 import android.content.Intent
+import android.content.SharedPreferences
 
 class ListaNovelasActivity : ComponentActivity() {
+    private lateinit var sharedPreferences: SharedPreferences
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        sharedPreferences = getSharedPreferences("settings", Context.MODE_PRIVATE)
+        val isDarkMode = sharedPreferences.getBoolean("dark_mode", false)
+
         setContent {
-            DefinitivoFeedbackTheme {
+            DefinitivoFeedbackTheme(darkTheme = isDarkMode) {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     ListaNovelasScreen(modifier = Modifier.padding(innerPadding))
                 }
@@ -29,6 +36,7 @@ class ListaNovelasActivity : ComponentActivity() {
         }
     }
 }
+
 @Composable
 fun ListaNovelasScreen(modifier: Modifier = Modifier) {
     var showDialog by remember { mutableStateOf(false) }
@@ -82,7 +90,7 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier) {
 
         val recyclerView = remember { RecyclerView(context) }
         recyclerView.layoutManager = LinearLayoutManager(context)
-        recyclerView.adapter = NovelaAdapter(novelasAMostrar) { novela ->
+        recyclerView.adapter = NovelaAdapter(context, novelasAMostrar) { novela ->
             novelaStorage.updateFavoriteStatus(novela) { success ->
                 if (success) {
                     novelas = novelas.map { if (it.nombre == novela.nombre) novela else it }
