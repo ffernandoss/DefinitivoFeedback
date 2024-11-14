@@ -52,3 +52,10 @@ Se ha añadido la funcionalidad para guardar el `userId` del usuario logueado en
 ### Cambios en `NovelaAdapter`
 
 Se ha añadido la funcionalidad para actualizar el estado de favorito de una novela en Firebase. Cuando el usuario marca o desmarca una novela como favorita, se actualiza en tiempo real en Firebase.
+
+
+
+## Entrega 3
+
+en esta entrega no hay fragments, ya que con composable no sé hacerlas, lo que he hecho ha sido añadir un pop up al pulsar la novela donde aparecen todos los datos
+y el widget lo que hace es mostrar todas las novelas de todos los usuarios
