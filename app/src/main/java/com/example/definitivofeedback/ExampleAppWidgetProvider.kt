@@ -22,7 +22,11 @@ class ExampleAppWidgetProvider : AppWidgetProvider() {
         // Obtener las novelas favoritas del usuario desde Firebase
         obtenerNovelasFavoritasDelUsuario { novelas ->
             // Crear el texto para mostrar las novelas
-            val novelasTexto = novelas.joinToString(separator = "\n") { it.nombre }
+            val novelasTexto = if (novelas.isNotEmpty()) {
+                novelas.joinToString(separator = "\n") { it.nombre }
+            } else {
+                "No hay novelas favoritas"
+            }
 
             // Actualizar el RemoteViews del widget
             val views = RemoteViews(context.packageName, R.layout.example_loading_appwidget)
@@ -39,7 +43,7 @@ class ExampleAppWidgetProvider : AppWidgetProvider() {
     private fun obtenerNovelasFavoritasDelUsuario(callback: (List<Novela>) -> Unit) {
         val db = FirebaseFirestore.getInstance()
         db.collection("novelas")
-            .whereEqualTo("isFavorite", true)
+            .whereEqualTo("favorite", true)
             .get()
             .addOnSuccessListener { result ->
                 val novelas = result.map { document ->
