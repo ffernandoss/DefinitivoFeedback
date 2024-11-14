@@ -12,7 +12,8 @@ import androidx.recyclerview.widget.RecyclerView
 class NovelaAdapter(
     private val context: Context,
     private val novelas: List<Novela>,
-    private val onFavoriteChanged: (Novela) -> Unit
+    private val onFavoriteChanged: (Novela) -> Unit,
+    private val onItemClick: (Novela) -> Unit
 ) : RecyclerView.Adapter<NovelaAdapter.NovelaViewHolder>() {
 
     inner class NovelaViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -50,6 +51,10 @@ class NovelaAdapter(
         holder.favoriteCheckBox.setOnCheckedChangeListener { _, isChecked ->
             val updatedNovela = novela.copy(isFavorite = isChecked)
             onFavoriteChanged(updatedNovela)
+        }
+
+        holder.itemView.setOnClickListener {
+            onItemClick(novela)
         }
     }
 

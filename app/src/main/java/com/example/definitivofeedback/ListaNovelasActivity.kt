@@ -19,7 +19,6 @@ import com.example.definitivofeedback.ui.theme.DefinitivoFeedbackTheme
 import android.content.Intent
 import android.content.SharedPreferences
 
-
 class ListaNovelasActivity : ComponentActivity() {
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var dbHelper: UserDatabaseHelper
@@ -46,6 +45,7 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier, dbHelper: UserDatabaseHelp
     var showDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showErrorDialog by remember { mutableStateOf(false) }
+    var showDetailsDialog by remember { mutableStateOf(false) }
     var nombre by remember { mutableStateOf("") }
     var año by remember { mutableStateOf("") }
     var descripcion by remember { mutableStateOf("") }
@@ -54,6 +54,7 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier, dbHelper: UserDatabaseHelp
     var nombreABorrar by remember { mutableStateOf("") }
     var mensajeError by remember { mutableStateOf("") }
     var mostrarFavoritas by remember { mutableStateOf(false) }
+    var novelaSeleccionada by remember { mutableStateOf<Novela?>(null) }
 
     val context = LocalContext.current
     val novelaStorage = NovelaStorage()
@@ -93,7 +94,7 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier, dbHelper: UserDatabaseHelp
 
         val recyclerView = remember { RecyclerView(context) }
         recyclerView.layoutManager = LinearLayoutManager(context)
-        recyclerView.adapter = NovelaAdapter(context, novelasAMostrar) { novela ->
+        recyclerView.adapter = NovelaAdapter(context, novelasAMostrar, { novela ->
             novelaStorage.updateFavoriteStatus(novela) { success ->
                 if (success) {
                     novelas = novelas.map { if (it.nombre == novela.nombre) novela else it }
@@ -102,7 +103,10 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier, dbHelper: UserDatabaseHelp
                     showErrorDialog = true
                 }
             }
-        }
+        }, { novela ->
+            novelaSeleccionada = novela
+            showDetailsDialog = true
+        })
 
         AndroidView({ recyclerView }, modifier = Modifier.fillMaxSize())
 
@@ -232,6 +236,27 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier, dbHelper: UserDatabaseHelp
                 confirmButton = {
                     Button(onClick = { showErrorDialog = false }) {
                         Text("OK")
+                    }
+                }
+            )
+        }
+
+        if (showDetailsDialog && novelaSeleccionada != null) {
+            AlertDialog(
+                onDismissRequest = { showDetailsDialog = false },
+                title = { Text(text = "Detalles de la novela") },
+                text = {
+                    Column {
+                        Text(text = "Nombre: ${novelaSeleccionada?.nombre}")
+                        Text(text = "Año: ${novelaSeleccionada?.año}")
+                        Text(text = "Descripción: ${novelaSeleccionada?.descripcion}")
+                        Text(text = "Valoración: ${novelaSeleccionada?.valoracion}")
+                        Text(text = "Favorita: ${if (novelaSeleccionada?.isFavorite == true) "Sí" else "No"}")
+                    }
+                },
+                confirmButton = {
+                    Button(onClick = { showDetailsDialog = false }) {
+                        Text("Cerrar")
                     }
                 }
             )
