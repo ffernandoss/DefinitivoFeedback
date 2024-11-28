@@ -59,3 +59,19 @@ Se ha añadido la funcionalidad para actualizar el estado de favorito de una nov
 
 en esta entrega no hay fragments, ya que con composable no sé hacerlas, lo que he hecho ha sido añadir un pop up al pulsar la novela donde aparecen todos los datos
 y el widget lo que hace es mostrar todas las novelas de todos los usuarios
+
+
+entrega 5
+primera pasada de memoria sin optimizar
+![image](https://github.com/user-attachments/assets/019f465a-db46-400e-bd78-0e70d44c76a2)
+
+Classes: 3000 clases cargadas en la memoria.
+Leaks: 0 fugas de memoria detectadas.
+Count: 122000 objetos asignados.
+Native: 170000 bytes de memoria nativa utilizados.
+Shallow: 5000000 bytes de memoria ocupada por los objetos en sí mismos.
+Retained: 1600000 bytes de memoria que se liberarían si los objetos y sus referencias fueran recolectados.
+
+
+
+
