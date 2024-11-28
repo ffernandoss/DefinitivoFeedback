@@ -3,47 +3,58 @@ package com.example.definitivofeedback
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import android.widget.RemoteViews
+import androidx.work.*
 import com.google.firebase.firestore.FirebaseFirestore
+import java.util.concurrent.TimeUnit
 
 class ExampleAppWidgetProvider : AppWidgetProvider() {
-    private val handler = Handler(Looper.getMainLooper())
-    private val updateInterval = 3000L // 3 seconds
-
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
         for (appWidgetId in appWidgetIds) {
-            updateWidget(context, appWidgetManager, appWidgetId)
+            scheduleWidgetUpdate(context, appWidgetId)
         }
+    }
+
+    private fun scheduleWidgetUpdate(context: Context, appWidgetId: Int) {
+        val workRequest = PeriodicWorkRequestBuilder<WidgetUpdateWorker>(15, TimeUnit.MINUTES)
+            .setInputData(workDataOf("appWidgetId" to appWidgetId))
+            .build()
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+            "WidgetUpdateWork_$appWidgetId",
+            ExistingPeriodicWorkPolicy.REPLACE,
+            workRequest
+        )
+    }
+}
+
+class WidgetUpdateWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
+    override suspend fun doWork(): Result {
+        val appWidgetId = inputData.getInt("appWidgetId", -1)
+        if (appWidgetId == -1) return Result.failure()
+
+        val appWidgetManager = AppWidgetManager.getInstance(applicationContext)
+        updateWidget(applicationContext, appWidgetManager, appWidgetId)
+        return Result.success()
     }
 
     private fun updateWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
-        // Obtener las novelas favoritas del usuario desde Firebase
-        obtenerNovelasFavoritasDelUsuario { novelas ->
-            // Crear el texto para mostrar las novelas
+        obtenerTodasLasNovelas { novelas ->
             val novelasTexto = if (novelas.isNotEmpty()) {
                 novelas.joinToString(separator = "\n") { it.nombre }
             } else {
-                "No hay novelas favoritas"
+                "No hay novelas disponibles"
             }
 
-            // Actualizar el RemoteViews del widget
             val views = RemoteViews(context.packageName, R.layout.example_loading_appwidget)
             views.setTextViewText(R.id.appwidget_text, novelasTexto)
 
-            // Actualizar el widget
             appWidgetManager.updateAppWidget(appWidgetId, views)
-
-            // Programar la siguiente actualización
-            handler.postDelayed({ updateWidget(context, appWidgetManager, appWidgetId) }, updateInterval)
         }
     }
 
-    private fun obtenerNovelasFavoritasDelUsuario(callback: (List<Novela>) -> Unit) {
+    private fun obtenerTodasLasNovelas(callback: (List<Novela>) -> Unit) {
         val db = FirebaseFirestore.getInstance()
         db.collection("novelas")
-            .whereEqualTo("favorite", true)
             .get()
             .addOnSuccessListener { result ->
                 val novelas = result.map { document ->
@@ -51,7 +62,7 @@ class ExampleAppWidgetProvider : AppWidgetProvider() {
                 }
                 callback(novelas)
             }
-            .addOnFailureListener { exception ->
+            .addOnFailureListener {
                 callback(emptyList())
             }
     }
