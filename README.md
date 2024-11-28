@@ -59,3 +59,27 @@ Se ha añadido la funcionalidad para actualizar el estado de favorito de una nov
 
 en esta entrega no hay fragments, ya que con composable no sé hacerlas, lo que he hecho ha sido añadir un pop up al pulsar la novela donde aparecen todos los datos
 y el widget lo que hace es mostrar todas las novelas de todos los usuarios
+
+
+entrega 5
+primera pasada de memoria sin optimizar
+![image](https://github.com/user-attachments/assets/019f465a-db46-400e-bd78-0e70d44c76a2)
+
+Classes: 3000 clases cargadas en la memoria.
+Leaks: 0 fugas de memoria detectadas.
+Count: 122000 objetos asignados.
+Native: 170000 bytes de memoria nativa utilizados.
+Shallow: 5000000 bytes de memoria ocupada por los objetos en sí mismos.
+Retained: 1600000 bytes de memoria que se liberarían si los objetos y sus referencias fueran recolectados.
+
+segunda pasada con el bitmap
+todos los valores se han reducido
+
+![image](https://github.com/user-attachments/assets/9de0b1ae-6602-42a2-bd01-a37b982685db)
+
+clases 2500: Este valor indica el número de clases cargadas en la memoria. En este caso, hay 2500 clases cargadas.  
+count 61000: Este valor representa el número total de objetos en la memoria. En este caso, hay 61000 objetos.  
+native 75000: Este valor indica la cantidad de memoria nativa utilizada, es decir, la memoria asignada fuera del heap de Java. En este caso, se están utilizando 75000 bytes de memoria nativa.  
+shallow 3000000: Este valor representa la cantidad de memoria superficial utilizada por los objetos, es decir, la memoria directamente asignada a los objetos sin contar las referencias a otros objetos. En este caso, se están utilizando 3000000 bytes de memoria superficial.  
+retained 1400000: Este valor indica la cantidad de memoria retenida por los objetos, es decir, la memoria que no puede ser liberada porque los objetos aún están referenciados. En este caso, se están reteniendo 1400000 bytes de memoria. 
+
