@@ -1,23 +1,22 @@
 package com.example.definitivofeedback
 
 import android.util.Log
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-
 
 data class Novela(
     val nombre: String = "",
     val año: Int = 0,
     val descripcion: String = "",
     val valoracion: Double = 0.0,
-    val isFavorite: Boolean = false
+    val isFavorite: Boolean = false,
+    val latitud: Double = 0.0,
+    val longitud: Double = 0.0
 )
 
 class NovelaStorage {
     private val db: FirebaseFirestore = Firebase.firestore
-
 
     fun saveNovela(novela: Novela) {
         db.collection("novelas")
@@ -75,7 +74,7 @@ class NovelaStorage {
             .addOnSuccessListener { result ->
                 for (document in result) {
                     db.collection("novelas").document(document.id)
-                        .update("favorite", novela.isFavorite)  // Cambia "isFavorite" a "favorite"
+                        .update("isFavorite", novela.isFavorite)
                         .addOnSuccessListener {
                             Log.d("NovelaStorage", "DocumentSnapshot successfully updated!")
                             callback(true)

@@ -10,14 +10,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.definitivofeedback.ui.theme.DefinitivoFeedbackTheme
 import android.content.Intent
 import android.content.SharedPreferences
+import androidx.compose.ui.unit.dp
 
 class ListaNovelasActivity : ComponentActivity() {
     private lateinit var sharedPreferences: SharedPreferences
@@ -50,6 +49,8 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier, dbHelper: UserDatabaseHelp
     var año by remember { mutableStateOf("") }
     var descripcion by remember { mutableStateOf("") }
     var valoracion by remember { mutableStateOf("") }
+    var latitud by remember { mutableStateOf("") }
+    var longitud by remember { mutableStateOf("") }
     var novelas by remember { mutableStateOf(listOf<Novela>()) }
     var nombreABorrar by remember { mutableStateOf("") }
     var mensajeError by remember { mutableStateOf("") }
@@ -71,6 +72,16 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier, dbHelper: UserDatabaseHelp
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        // Display coordinates at the top
+        Text(text = "Latitud: $latitud, Longitud: $longitud")
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Display specified coordinates
+        Text(text = "1. 39.8570° N, -4.0235° W")
+        Text(text = "2. 39.8444° N, -4.0065° W")
+        Text(text = "3. 39.8640° N, -4.0006° W")
+        Spacer(modifier = Modifier.height(16.dp))
+
         Button(onClick = { showDialog = true }) {
             Text(text = "Añadir novela")
         }
@@ -136,12 +147,22 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier, dbHelper: UserDatabaseHelp
                             onValueChange = { valoracion = it },
                             label = { Text("Valoración") }
                         )
+                        TextField(
+                            value = latitud,
+                            onValueChange = { latitud = it },
+                            label = { Text("Latitud") }
+                        )
+                        TextField(
+                            value = longitud,
+                            onValueChange = { longitud = it },
+                            label = { Text("Longitud") }
+                        )
                     }
                 },
                 confirmButton = {
                     Button(onClick = {
                         when {
-                            nombre.isBlank() || año.isBlank() || descripcion.isBlank() || valoracion.isBlank() -> {
+                            nombre.isBlank() || año.isBlank() || descripcion.isBlank() || valoracion.isBlank() || latitud.isBlank() || longitud.isBlank() -> {
                                 mensajeError = "Todos los campos deben estar completos"
                                 showErrorDialog = true
                             }
@@ -153,13 +174,23 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier, dbHelper: UserDatabaseHelp
                                 mensajeError = "La valoración no debe contener letras"
                                 showErrorDialog = true
                             }
+                            !latitud.all { it.isDigit() || it == '.' } -> {
+                                mensajeError = "La latitud no debe contener letras"
+                                showErrorDialog = true
+                            }
+                            !longitud.all { it.isDigit() || it == '.' } -> {
+                                mensajeError = "La longitud no debe contener letras"
+                                showErrorDialog = true
+                            }
                             else -> {
                                 val nuevaNovela = Novela(
                                     nombre = nombre,
                                     año = año.toInt(),
                                     descripcion = descripcion,
                                     valoracion = valoracion.toDouble(),
-                                    isFavorite = false
+                                    isFavorite = false,
+                                    latitud = latitud.toDouble(),
+                                    longitud = longitud.toDouble()
                                 )
                                 dbHelper.addNovelaForUser(userId, nuevaNovela)
                                 novelaStorage.saveNovela(nuevaNovela)
@@ -168,6 +199,8 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier, dbHelper: UserDatabaseHelp
                                 año = ""
                                 descripcion = ""
                                 valoracion = ""
+                                latitud = ""
+                                longitud = ""
                                 showDialog = false
                             }
                         }
@@ -251,6 +284,8 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier, dbHelper: UserDatabaseHelp
                         Text(text = "Año: ${novelaSeleccionada?.año}")
                         Text(text = "Descripción: ${novelaSeleccionada?.descripcion}")
                         Text(text = "Valoración: ${novelaSeleccionada?.valoracion}")
+                        Text(text = "Latitud: ${novelaSeleccionada?.latitud}")
+                        Text(text = "Longitud: ${novelaSeleccionada?.longitud}")
                         Text(text = "Favorita: ${if (novelaSeleccionada?.isFavorite == true) "Sí" else "No"}")
                     }
                 },
