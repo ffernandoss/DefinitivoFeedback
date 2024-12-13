@@ -83,3 +83,10 @@ native 75000: Este valor indica la cantidad de memoria nativa utilizada, es deci
 shallow 3000000: Este valor representa la cantidad de memoria superficial utilizada por los objetos, es decir, la memoria directamente asignada a los objetos sin contar las referencias a otros objetos. En este caso, se están utilizando 3000000 bytes de memoria superficial.  
 retained 1400000: Este valor indica la cantidad de memoria retenida por los objetos, es decir, la memoria que no puede ser liberada porque los objetos aún están referenciados. En este caso, se están reteniendo 1400000 bytes de memoria. 
 
+
+network profiler con los cambios de rendimiento
+
+![image](https://github.com/user-attachments/assets/5e240f7c-9926-4bf1-a917-0b17fd825ad3)
+
+
+para la mejora de bateria se ha mdificado la clase ExampleAppWidgetProvider para que el widget se actualice cada 15 min y asi mejorar el ahorro de bateria
