@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.definitivofeedback.ui.theme.DefinitivoFeedbackTheme
 import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import androidx.compose.ui.unit.dp
 
 class ListaNovelasActivity : ComponentActivity() {
@@ -223,6 +224,44 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier, dbHelper: UserDatabaseHelp
             )
         }
 
+        if (showDeleteDialog) {
+            AlertDialog(
+                onDismissRequest = { showDeleteDialog = false },
+                title = { Text(text = "Eliminar novela") },
+                text = {
+                    Column {
+                        TextField(
+                            value = nombreABorrar,
+                            onValueChange = { nombreABorrar = it },
+                            label = { Text("Nombre de la novela a borrar") }
+                        )
+                    }
+                },
+                confirmButton = {
+                    Button(onClick = {
+                        dbHelper.deleteNovelaForUser(userId, nombreABorrar)
+                        novelaStorage.deleteNovela(nombreABorrar) { success ->
+                            if (success) {
+                                novelas = dbHelper.getNovelasByUser(userId)
+                                nombreABorrar = ""
+                                showDeleteDialog = false
+                            } else {
+                                mensajeError = "Error al borrar la novela en Firestore"
+                                showErrorDialog = true
+                            }
+                        }
+                    }) {
+                        Text("Eliminar")
+                    }
+                },
+                dismissButton = {
+                    Button(onClick = { showDeleteDialog = false }) {
+                        Text("Cancelar")
+                    }
+                }
+            )
+        }
+
         if (showErrorDialog) {
             AlertDialog(
                 onDismissRequest = { showErrorDialog = false },
@@ -258,11 +297,11 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier, dbHelper: UserDatabaseHelp
                 },
                 dismissButton = {
                     Button(onClick = {
-                        showMapDialog = true
                         novelaStorage.getNovelaByName(novelaSeleccionada?.nombre ?: "") { novela ->
                             if (novela != null) {
-                                latitud = novela.latitud.toString()
-                                longitud = novela.longitud.toString()
+                                val mapsUrl = "https://www.google.com/maps?q=${novela.latitud},${novela.longitud}"
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(mapsUrl))
+                                context.startActivity(intent)
                             }
                         }
                     }) {
