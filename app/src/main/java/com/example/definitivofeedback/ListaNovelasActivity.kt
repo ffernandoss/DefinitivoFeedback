@@ -172,16 +172,16 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier, dbHelper: UserDatabaseHelp
                                 mensajeError = "El año no debe contener letras"
                                 showErrorDialog = true
                             }
-                            !valoracion.all { it.isDigit() } -> {
+                            !valoracion.all { it.isDigit() || it == '.' } -> {
                                 mensajeError = "La valoración no debe contener letras"
                                 showErrorDialog = true
                             }
-                            !latitud.all { it.isDigit() || it == '.' } -> {
-                                mensajeError = "La latitud no debe contener letras"
+                            !latitud.matches(Regex("-?\\d*\\.?\\d+")) -> {  // Allow negative values and decimal
+                                mensajeError = "La latitud debe ser un número válido"
                                 showErrorDialog = true
                             }
-                            !longitud.all { it.isDigit() || it == '.' } -> {
-                                mensajeError = "La longitud no debe contener letras"
+                            !longitud.matches(Regex("-?\\d*\\.?\\d+")) -> {  // Allow negative values and decimal
+                                mensajeError = "La longitud debe ser un número válido"
                                 showErrorDialog = true
                             }
                             else -> {
@@ -328,5 +328,14 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier, dbHelper: UserDatabaseHelp
                 }
             )
         }
+    }
+}
+
+fun isValidCoordinate(coordinate: String): Boolean {
+    return try {
+        val value = coordinate.toDouble()
+        value in -180.0..180.0
+    } catch (e: Exception) {
+        false
     }
 }
