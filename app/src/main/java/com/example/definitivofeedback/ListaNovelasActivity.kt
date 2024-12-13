@@ -18,6 +18,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
 import androidx.compose.ui.unit.dp
+import kotlin.random.Random
 
 class ListaNovelasActivity : ComponentActivity() {
     private lateinit var sharedPreferences: SharedPreferences
@@ -101,6 +102,16 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier, dbHelper: UserDatabaseHelp
             context.startActivity(intent)
         }) {
             Text(text = "Volver a Main")
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(onClick = {
+            val randomLat = Random.nextDouble(-90.0, 90.0)
+            val randomLong = Random.nextDouble(-180.0, 180.0)
+            val mapsUrl = "https://www.google.com/maps?q=$randomLat,$randomLong"
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(mapsUrl))
+            context.startActivity(intent)
+        }) {
+            Text(text = "Mostrar ubicación actual")
         }
 
         val novelasAMostrar = if (mostrarFavoritas) novelas.filter { it.isFavorite } else novelas
@@ -330,6 +341,7 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier, dbHelper: UserDatabaseHelp
         }
     }
 }
+
 
 fun isValidCoordinate(coordinate: String): Boolean {
     return try {
