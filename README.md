@@ -90,3 +90,8 @@ network profiler con los cambios de rendimiento
 
 
 para la mejora de bateria se ha mdificado la clase ExampleAppWidgetProvider para que el widget se actualice cada 15 min y asi mejorar el ahorro de bateria
+
+
+enntrega 6
+
+en esta entrega cuando se añade una novela, tambien se piden 2 parametros, el de latitud y el de longitud, cuando se le da a la novela añadida, aparecen los detalles de la novela pero aunque latitud y longitud aparecen en 0, se añaden correctamente al firebase, luego cuando se le da a MAPA aparece la ubicacion introducida en la novela, ademas hay un boton de ubicacion actual que te saca una ubicacion random
