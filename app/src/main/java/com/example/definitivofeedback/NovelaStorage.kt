@@ -18,14 +18,32 @@ data class Novela(
 class NovelaStorage {
     private val db: FirebaseFirestore = Firebase.firestore
 
-    fun saveNovela(novela: Novela) {
+    fun getNovelaByName(nombre: String, callback: (Novela?) -> Unit) {
+        db.collection("novelas")
+            .whereEqualTo("nombre", nombre)
+            .get()
+            .addOnSuccessListener { result ->
+                val novela = result.documents.firstOrNull()?.toObject(Novela::class.java)
+                callback(novela)
+            }
+            .addOnFailureListener { exception ->
+                Log.w("NovelaStorage", "Error getting document.", exception)
+                callback(null)
+            }
+    }
+
+
+
+    fun saveNovela(novela: Novela, callback: (Boolean) -> Unit) {
         db.collection("novelas")
             .add(novela)
-            .addOnSuccessListener { documentReference ->
-                Log.d("NovelaStorage", "DocumentSnapshot added with ID: ${documentReference.id}")
+            .addOnSuccessListener {
+                Log.d("NovelaStorage", "DocumentSnapshot successfully written!")
+                callback(true)
             }
             .addOnFailureListener { e ->
-                Log.w("NovelaStorage", "Error adding document", e)
+                Log.w("NovelaStorage", "Error writing document", e)
+                callback(false)
             }
     }
 

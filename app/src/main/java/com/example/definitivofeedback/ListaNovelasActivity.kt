@@ -45,6 +45,7 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier, dbHelper: UserDatabaseHelp
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showErrorDialog by remember { mutableStateOf(false) }
     var showDetailsDialog by remember { mutableStateOf(false) }
+    var showMapDialog by remember { mutableStateOf(false) }
     var nombre by remember { mutableStateOf("") }
     var año by remember { mutableStateOf("") }
     var descripcion by remember { mutableStateOf("") }
@@ -193,15 +194,21 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier, dbHelper: UserDatabaseHelp
                                     longitud = longitud.toDouble()
                                 )
                                 dbHelper.addNovelaForUser(userId, nuevaNovela)
-                                novelaStorage.saveNovela(nuevaNovela)
-                                novelas = dbHelper.getNovelasByUser(userId)
-                                nombre = ""
-                                año = ""
-                                descripcion = ""
-                                valoracion = ""
-                                latitud = ""
-                                longitud = ""
-                                showDialog = false
+                                novelaStorage.saveNovela(nuevaNovela) { success ->
+                                    if (success) {
+                                        novelas = dbHelper.getNovelasByUser(userId)
+                                        nombre = ""
+                                        año = ""
+                                        descripcion = ""
+                                        valoracion = ""
+                                        latitud = ""
+                                        longitud = ""
+                                        showDialog = false
+                                    } else {
+                                        mensajeError = "Error al guardar la novela en Firestore"
+                                        showErrorDialog = true
+                                    }
+                                }
                             }
                         }
                     }) {
@@ -210,51 +217,6 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier, dbHelper: UserDatabaseHelp
                 },
                 dismissButton = {
                     Button(onClick = { showDialog = false }) {
-                        Text("Cancelar")
-                    }
-                }
-            )
-        }
-
-        if (showDeleteDialog) {
-            AlertDialog(
-                onDismissRequest = { showDeleteDialog = false },
-                title = { Text(text = "Eliminar novela") },
-                text = {
-                    Column {
-                        TextField(
-                            value = nombreABorrar,
-                            onValueChange = { nombreABorrar = it },
-                            label = { Text("Nombre de la novela a borrar") }
-                        )
-                    }
-                },
-                confirmButton = {
-                    Button(onClick = {
-                        val novelaAEliminar = novelas.find { it.nombre == nombreABorrar }
-                        if (novelaAEliminar != null) {
-                            novelaStorage.deleteNovela(novelaAEliminar.nombre) { success ->
-                                if (success) {
-                                    dbHelper.deleteNovelaForUser(userId, novelaAEliminar.nombre)
-                                    novelas = dbHelper.getNovelasByUser(userId)
-                                    mensajeError = ""
-                                } else {
-                                    mensajeError = "Error al eliminar la novela de Firestore"
-                                    showErrorDialog = true
-                                }
-                            }
-                        } else {
-                            mensajeError = "No se ha encontrado ninguna novela con ese nombre"
-                            showErrorDialog = true
-                        }
-                        nombreABorrar = ""
-                        showDeleteDialog = false
-                    }) {
-                        Text("Eliminar")
-                    }
-                },
-                dismissButton = {
-                    Button(onClick = { showDeleteDialog = false }) {
                         Text("Cancelar")
                     }
                 }
@@ -291,6 +253,37 @@ fun ListaNovelasScreen(modifier: Modifier = Modifier, dbHelper: UserDatabaseHelp
                 },
                 confirmButton = {
                     Button(onClick = { showDetailsDialog = false }) {
+                        Text("Cerrar")
+                    }
+                },
+                dismissButton = {
+                    Button(onClick = {
+                        showMapDialog = true
+                        novelaStorage.getNovelaByName(novelaSeleccionada?.nombre ?: "") { novela ->
+                            if (novela != null) {
+                                latitud = novela.latitud.toString()
+                                longitud = novela.longitud.toString()
+                            }
+                        }
+                    }) {
+                        Text("MAPA")
+                    }
+                }
+            )
+        }
+
+        if (showMapDialog) {
+            AlertDialog(
+                onDismissRequest = { showMapDialog = false },
+                title = { Text(text = "Coordenadas de la novela") },
+                text = {
+                    Column {
+                        Text(text = "Latitud: $latitud")
+                        Text(text = "Longitud: $longitud")
+                    }
+                },
+                confirmButton = {
+                    Button(onClick = { showMapDialog = false }) {
                         Text("Cerrar")
                     }
                 }
